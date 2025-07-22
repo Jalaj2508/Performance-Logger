@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block content %}
+    <a href="{{ url_for('add_test') }}" class="button">+ Add New Test</a>
+    <a href="{{ url_for('export_csv') }}" class="button">Export as CSV</a>
+    <a href="{{ url_for('export_pdf') }}" class="button">Export as PDF</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Model</th>
+                <th>Temperature</th>
+                <th>Pressure</th>
+                <th>Noise</th>
+                <th>Tester</th>
+                <th>Result</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for test in tests %}
+            <tr>
+                <td>{{ test[0] }}</td>
+                <td>{{ test[1] }}</td>
+                <td>{{ test[2] }}</td>
+                <td>{{ test[3] }}</td>
+                <td>{{ test[4] }}</td>
+                <td>{{ test[5] }}</td>
+                <td>{{ test[6] }}</td>
+                <td>{{ test[7] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

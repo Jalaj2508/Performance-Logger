@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h2>Add New Test Entry</h2>
+    <form method="post">
+        <label>Compressor Model</label>
+        <input type="text" name="model" required>
+        
+        <label>Temperature (°C)</label>
+        <input type="number" step="0.01" name="temperature" required>
+        
+        <label>Pressure (psi)</label>
+        <input type="number" step="0.01" name="pressure" required>
+        
+        <label>Noise (dB)</label>
+        <input type="number" step="0.01" name="noise" required>
+        
+        <label>Tested By</label>
+        <input type="text" name="tester" required>
+        
+        <label>Result</label>
+        <select name="result" required>
+            <option value="Pass">Pass</option>
+            <option value="Fail">Fail</option>
+        </select>
+        
+        <input type="submit" value="Submit">
+    </form>
+{% endblock %}
