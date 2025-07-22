@@ -1,3 +1,5 @@
-flask
-reportlab
+Flask
+gunicorn
 pandas
+reportlab
+openpyxl
