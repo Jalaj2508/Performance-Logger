@@ -5,6 +5,8 @@ from flask import send_file
 import csv
 import os
 from fpdf import FPDF
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
 app = Flask(__name__)
 DB = 'database/compressor.db'
@@ -104,6 +106,41 @@ def export_pdf():
     pdf.output(filename)
 
     return send_file(filename, as_attachment=True)
+
+@app.route('/bill/<int:test_id>')
+def view_bill(test_id):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute("SELECT * FROM tests WHERE id = ?", (test_id,))
+    test = c.fetchone()
+    conn.close()
+    return render_template('bill.html', test=test)
+
+@app.route('/bill/<int:test_id>/pdf')
+def download_pdf(test_id):
+    conn = sqlite3.connect(DB)
+    c = conn.cursor()
+    c.execute("SELECT * FROM tests WHERE id = ?", (test_id,))
+    test = c.fetchone()
+    conn.close()
+
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer)
+    p.setFont("Helvetica", 12)
+    p.drawString(200, 800, "Compressor Test Report")
+    
+    fields = ["ID", "Model", "Temperature", "Pressure", "Noise", "Tester", "Result", "Date"]
+    y = 760
+    for i in range(len(fields)):
+        p.drawString(100, y, f"{fields[i]}: {test[i]}")
+        y -= 20
+
+    p.showPage()
+    p.save()
+
+    buffer.seek(0)
+    return send_file(buffer, as_attachment=True, download_name=f"test_{test_id}_bill.pdf", mimetype='application/pdf')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

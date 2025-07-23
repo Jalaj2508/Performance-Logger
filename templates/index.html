@@ -18,17 +18,17 @@
             </tr>
         </thead>
         <tbody>
-            {% for test in tests %}
-            <tr>
-                <td>{{ test[0] }}</td>
-                <td>{{ test[1] }}</td>
-                <td>{{ test[2] }}</td>
-                <td>{{ test[3] }}</td>
-                <td>{{ test[4] }}</td>
-                <td>{{ test[5] }}</td>
-                <td>{{ test[6] }}</td>
-                <td>{{ test[7] }}</td>
-            </tr>
+  {% for test in tests %}
+        <tr onclick="window.location.href='{{ url_for('view_bill', test_id=test[0]) }}'" style="cursor: pointer;">
+            <td>{{ test[0] }}</td>
+            <td>{{ test[1] }}</td>
+            <td>{{ test[2] }}</td>
+            <td>{{ test[3] }}</td>
+            <td>{{ test[4] }}</td>
+            <td>{{ test[5] }}</td>
+            <td>{{ test[6] }}</td>
+            <td>{{ test[7] }}</td>
+        </tr>
             {% endfor %}
         </tbody>
     </table>
