@@ -1,32 +1,88 @@
+<!-- templates/invoice.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Test Bill</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    .bill { border: 1px solid #333; padding: 20px; width: 600px; margin: auto; }
-    h2 { text-align: center; }
-    .field { margin-bottom: 10px; }
-    .label { font-weight: bold; }
-    .button-container { text-align: center; margin-top: 20px; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Bill</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 40px;
+        }
+        .header, .footer {
+            text-align: center;
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+        td, th {
+            border: 1px solid #2c3e50;
+            padding: 8px;
+            text-align: center;
+        }
+        .no-border {
+            border: none;
+        }
+        .bold {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-  <div class="bill">
-    <h2>Compressor Test Bill</h2>
-    <div class="field"><span class="label">ID:</span> {{ test[0] }}</div>
-    <div class="field"><span class="label">Model:</span> {{ test[1] }}</div>
-    <div class="field"><span class="label">Temperature:</span> {{ test[2] }}</div>
-    <div class="field"><span class="label">Pressure:</span> {{ test[3] }}</div>
-    <div class="field"><span class="label">Noise:</span> {{ test[4] }}</div>
-    <div class="field"><span class="label">Tester:</span> {{ test[5] }}</div>
-    <div class="field"><span class="label">Result:</span> {{ test[6] }}</div>
-    <div class="field"><span class="label">Date:</span> {{ test[7] }}</div>
 
-    <div class="button-container">
-      <a href="{{ url_for('download_pdf', test_id=test[0]) }}"><button>Download PDF</button></a>
+    <div class="header">
+        <h2>{{ data.company_name }}</h2>
+        <p><i>{{ data.company_msg }}</i></p>
+        <div style="float:right; text-align:right;">
+            <p><strong>Invoice No:</strong> {{ data.invoice_no }}</p>
+            <p><strong>Date:</strong> {{ data.invoice_date }}</p>
+        </div>
     </div>
-  </div>
+
+    <p><strong>Name:</strong> {{ data.name }}</p>
+    <p><strong>Address:</strong> {{ data.address }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>S.No.</th>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Rate</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data.items %}
+            <tr>
+                <td>{{ item.sno }}</td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.qty }}</td>
+                <td>₹{{ item.rate }}</td>
+                <td>₹{{ item.amount }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4" class="bold">Total</td>
+                <td class="bold">₹{{ data.total }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p><strong>Rupees in words:</strong> {{ data.amount_words }}</p>
+    <p><strong>Terms & Conditions:</strong> {{ data.terms }}</p>
+
+    <div class="footer">
+        <p>__________________________</p>
+        <p>Signature</p>
+    </div>
+
+    <form action="{{ url_for('download_pdf', test_id=data.invoice_no.split('-')[1]) }}" method="get">
+        <button type="submit">Export as PDF</button>
+    </form>
+
 </body>
 </html>

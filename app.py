@@ -7,6 +7,8 @@ import os
 from fpdf import FPDF
 from reportlab.pdfgen import canvas
 from io import BytesIO
+import pdfkit
+from flask import make_response
 
 app = Flask(__name__)
 DB = 'database/compressor.db'
@@ -140,6 +142,50 @@ def download_pdf(test_id):
 
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name=f"test_{test_id}_bill.pdf", mimetype='application/pdf')
+
+@app.route('/view_bill/<int:test_id>')
+def view_bill(test_id):
+    # Fetch test details from DB using test_id
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM tests WHERE id = %s", (test_id,))
+    test = cur.fetchone()
+    cur.close()
+
+    if not test:
+        return "Test not found", 404
+
+    # Sample static details – replace with your patient/user data
+    bill_data = {
+        'company_name': 'CareLab Diagnostics',
+        'company_msg': 'Precision in Every Report',
+        'invoice_no': f'INV-{test_id}',
+        'invoice_date': datetime.now().strftime("%d-%m-%Y"),
+        'name': 'Patient Name',
+        'address': 'Patient Address',
+        'items': [
+            {
+                'sno': 1,
+                'description': test[1],  # assuming test[1] is test name
+                'qty': 1,
+                'rate': test[2],         # assuming test[2] is cost
+                'amount': test[2]
+            }
+        ],
+        'total': test[2],
+        'amount_words': 'One Thousand Rupees Only',
+        'terms': 'Reports delivered digitally. No refunds.',
+    }
+
+    return render_template('invoice.html', data=bill_data)
+
+@app.route('/download_pdf/<int:test_id>')
+def download_pdf(test_id):
+    rendered = view_bill(test_id).data.decode("utf-8")
+    pdf = pdfkit.from_string(rendered, False)
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=Invoice_{test_id}.pdf'
+    return response
 
 
 if __name__ == '__main__':
