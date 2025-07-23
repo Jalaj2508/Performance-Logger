@@ -117,9 +117,35 @@ def view_bill(test_id):
     c.execute("SELECT * FROM tests WHERE id = ?", (test_id,))
     test = c.fetchone()
     conn.close()
-    return render_template('bill.html', test=test)
 
-@app.route('/bill/<int:test_id>/pdf')
+    if not test:
+        return "Test not found", 404
+
+    # Build invoice structure
+    bill_data = {
+        'company_name': 'CareLab Diagnostics',
+        'company_msg': 'Precision in Every Report',
+        'invoice_no': f'INV-{test_id}',
+        'invoice_date': datetime.now().strftime("%d-%m-%Y"),
+        'name': 'Patient Name',
+        'address': 'Patient Address',
+        'items': [
+            {
+                'sno': 1,
+                'description': test[1],
+                'qty': 1,
+                'rate': test[2],
+                'amount': test[2]
+            }
+        ],
+        'total': test[2],
+        'amount_words': 'One Thousand Rupees Only',
+        'terms': 'Reports delivered digitally. No refunds.',
+    }
+
+    return render_template('bill.html', data=bill_data)
+
+@app.route('/download_pdf/<int:test_id>')
 def download_pdf(test_id):
     conn = sqlite3.connect(DB)
     c = conn.cursor()
@@ -127,22 +153,33 @@ def download_pdf(test_id):
     test = c.fetchone()
     conn.close()
 
-    buffer = BytesIO()
-    p = canvas.Canvas(buffer)
-    p.setFont("Helvetica", 12)
-    p.drawString(200, 800, "Compressor Test Report")
-    
-    fields = ["ID", "Model", "Temperature", "Pressure", "Noise", "Tester", "Result", "Date"]
-    y = 760
-    for i in range(len(fields)):
-        p.drawString(100, y, f"{fields[i]}: {test[i]}")
-        y -= 20
+    bill_data = {
+        'company_name': 'CareLab Diagnostics',
+        'company_msg': 'Precision in Every Report',
+        'invoice_no': f'INV-{test_id}',
+        'invoice_date': datetime.now().strftime("%d-%m-%Y"),
+        'name': 'Patient Name',
+        'address': 'Patient Address',
+        'items': [
+            {
+                'sno': 1,
+                'description': test[1],
+                'qty': 1,
+                'rate': test[2],
+                'amount': test[2]
+            }
+        ],
+        'total': test[2],
+        'amount_words': 'One Thousand Rupees Only',
+        'terms': 'Reports delivered digitally. No refunds.',
+    }
 
-    p.showPage()
-    p.save()
-
-    buffer.seek(0)
-    return send_file(buffer, as_attachment=True, download_name=f"test_{test_id}_bill.pdf", mimetype='application/pdf')
+    rendered = render_template("bill.html", data=bill_data)
+    pdf = pdfkit.from_string(rendered, False)
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=Invoice_{test_id}.pdf'
+    return response
 
 
 
