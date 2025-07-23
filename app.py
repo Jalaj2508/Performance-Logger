@@ -145,15 +145,6 @@ def download_pdf(test_id):
     return send_file(buffer, as_attachment=True, download_name=f"test_{test_id}_bill.pdf", mimetype='application/pdf')
 
 
-@app.route('/download_pdf/<int:test_id>')
-def download_pdf(test_id):
-    rendered = view_bill(test_id).data.decode("utf-8")
-    pdf = pdfkit.from_string(rendered, False)
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = f'attachment; filename=Invoice_{test_id}.pdf'
-    return response
-
 
 if __name__ == '__main__':
     app.run(debug=True)
