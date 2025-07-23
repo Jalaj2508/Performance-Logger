@@ -9,6 +9,7 @@ from reportlab.pdfgen import canvas
 from io import BytesIO
 import pdfkit
 from flask import make_response
+import mysql 
 
 app = Flask(__name__)
 DB = 'database/compressor.db'
